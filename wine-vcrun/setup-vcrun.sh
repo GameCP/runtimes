@@ -9,6 +9,8 @@ sleep 2
 
 # Install vcrun2022 (installer crashes but DLLs get extracted via cabextract)
 echo "Installing vcrun2022..."
+export WINEARCH=win64
+export WINEPREFIX=/home/container/.wine
 WINEDLLOVERRIDES="mscoree,mshtml=" winetricks -q vcrun2022 || true
 
 # Clean up

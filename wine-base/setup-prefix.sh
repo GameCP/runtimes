@@ -7,8 +7,10 @@ XVFB_PID=$!
 export DISPLAY=:0
 sleep 2
 
-# Initialize Wine prefix
-echo "Initializing Wine prefix..."
+# Initialize Wine prefix as win64 (required for UDK.exe and other 64-bit games)
+echo "Initializing Wine prefix (win64)..."
+export WINEARCH=win64
+export WINEPREFIX=/home/container/.wine
 WINEDLLOVERRIDES="mscoree,mshtml=" wineboot --init
 sleep 5
 echo "Wine prefix created."
