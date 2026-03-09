@@ -33,7 +33,7 @@ RUN             mkdir -pm755 /etc/apt/keyrings \
                 && wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key \
                 && wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/bookworm/winehq-bookworm.sources \
                 && apt update \
-                && apt install --install-recommends winehq-stable wine-binfmt -y \
+                && apt install --install-recommends winehq-stable wine-binfmt cabextract -y \
                 && rm -rf /var/lib/apt/lists/*
 
 # Install rcon-cli
@@ -47,31 +47,20 @@ RUN             cd /tmp/ \
 RUN             wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/pelican-eggs/winetricks/master/src/winetricks \
                 && chmod +x /usr/sbin/winetricks
 
-# Create /tmp/.X11-unix as root (before we drop privileges)
+# Create /tmp/.X11-unix as root
 RUN             mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+
+# Pre-initialize Wine prefix with Mono using a setup script
+RUN             mkdir -p /home/container/.wine /home/container/.cache
+COPY            setup-prefix.sh /tmp/setup-prefix.sh
+RUN             chmod +x /tmp/setup-prefix.sh && /tmp/setup-prefix.sh && rm /tmp/setup-prefix.sh
+RUN             chown -R 1000:1000 /home/container
 
 # Environment
 ENV             HOME=/home/container
 ENV             WINEPREFIX=/home/container/.wine
 ENV             WINEDEBUG=-all
 ENV             DISPLAY=:0
-
-# Pre-initialize Wine prefix as root, then fix permissions
-# This creates a working prefix with Mono so games don't need to do it at runtime
-RUN             mkdir -p /home/container/.wine \
-                && mkdir -p /home/container/.cache \
-                && Xvfb :0 -screen 0 640x480x24 -ac &\
-                && sleep 2 \
-                && WINEDLLOVERRIDES="mscoree,mshtml=" wineboot --init \
-                && sleep 5 \
-                # Download and install Wine Mono
-                && MONO_VER=9.4.0 \
-                && wget -q -O /home/container/.cache/wine-mono-${MONO_VER}-x86.msi \
-                    https://dl.winehq.org/wine/wine-mono/${MONO_VER}/wine-mono-${MONO_VER}-x86.msi \
-                && wine msiexec /i /home/container/.cache/wine-mono-${MONO_VER}-x86.msi /qn \
-                && sleep 2 \
-                && wineserver -k || true \
-                && chown -R 1000:1000 /home/container
 
 COPY            entrypoint.sh /entrypoint.sh
 RUN             chmod +x /entrypoint.sh
