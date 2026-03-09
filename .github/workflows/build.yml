@@ -35,11 +35,10 @@ jobs:
         with:
           context: ./wine-base
           push: true
+          no-cache: true
           tags: |
             ${{ env.IMAGE_PREFIX }}:wine-base
             ${{ env.IMAGE_PREFIX }}:wine-base-${{ github.sha }}
-          cache-from: type=gha,scope=wine-base
-          cache-to: type=gha,mode=max,scope=wine-base
 
   wine-vcrun:
     runs-on: ubuntu-latest
@@ -67,8 +66,7 @@ jobs:
         with:
           context: ./wine-vcrun
           push: true
+          no-cache: true
           tags: |
             ${{ env.IMAGE_PREFIX }}:wine-vcrun
             ${{ env.IMAGE_PREFIX }}:wine-vcrun-${{ github.sha }}
-          cache-from: type=gha,scope=wine-vcrun
-          cache-to: type=gha,mode=max,scope=wine-vcrun
