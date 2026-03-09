@@ -7,7 +7,7 @@ XVFB_PID=$!
 export DISPLAY=:0
 sleep 2
 
-# Initialize Wine prefix with mscoree disabled (prevents Mono dialog)
+# Initialize Wine prefix
 echo "Initializing Wine prefix..."
 WINEDLLOVERRIDES="mscoree,mshtml=" wineboot --init
 sleep 5
@@ -27,5 +27,14 @@ echo "Wine Mono installed."
 # Clean up
 wineserver -k || true
 kill $XVFB_PID 2>/dev/null || true
+
+# Move prefix to /opt so it survives volume mounts
+echo "Saving prefix to /opt/wine-prefix..."
+cp -a /home/container/.wine /opt/wine-prefix
+cp -a /home/container/.cache /opt/wine-cache
+
+# Clean up lock files so they don't persist in the image
+rm -f /tmp/.X*-lock
+rm -rf /tmp/.X11-unix
 
 echo "Wine prefix setup complete."

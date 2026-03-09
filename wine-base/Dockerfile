@@ -1,7 +1,7 @@
 # -----------------------------------------------
 # GameCP Wine Base Runtime
-# Pre-bakes Wine prefix, Mono, and Xvfb so game
-# startup scripts don't need to handle X11 setup.
+# Pre-bakes Wine prefix + Mono at /opt/wine-prefix
+# so it survives volume mounts at /home/container.
 # -----------------------------------------------
 FROM            ghcr.io/parkervcp/yolks:debian
 
@@ -47,14 +47,17 @@ RUN             cd /tmp/ \
 RUN             wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/pelican-eggs/winetricks/master/src/winetricks \
                 && chmod +x /usr/sbin/winetricks
 
-# Create /tmp/.X11-unix as root
-RUN             mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+# Prepare directories
+RUN             mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix \
+                && mkdir -p /home/container/.wine /home/container/.cache \
+                && mkdir -p /opt/wine-prefix
 
-# Pre-initialize Wine prefix with Mono using a setup script
-RUN             mkdir -p /home/container/.wine /home/container/.cache
+# Pre-initialize Wine prefix + Mono, saved to /opt/wine-prefix
 COPY            setup-prefix.sh /tmp/setup-prefix.sh
 RUN             chmod +x /tmp/setup-prefix.sh && /tmp/setup-prefix.sh && rm /tmp/setup-prefix.sh
-RUN             chown -R 1000:1000 /home/container
+
+# Fix permissions
+RUN             chown -R 1000:1000 /home/container /opt/wine-prefix /opt/wine-cache
 
 # Environment
 ENV             HOME=/home/container
