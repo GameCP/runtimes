@@ -8,6 +8,7 @@ Custom Docker images for game servers. Pre-bake Wine prefixes, dependencies, and
 |-------|-----|-------------|---------|
 | `wine-base` | `ghcr.io/gamecp/runtimes:wine-base` | Wine + Mono + Xvfb, pre-initialized prefix | Base for all Wine games |
 | `wine-vcrun` | `ghcr.io/gamecp/runtimes:wine-vcrun` | wine-base + vcrun2022 (VC++ runtime) | Subsistence, UE games |
+| `stardew` | `ghcr.io/gamecp/runtimes:stardew` | Xvfb + Mesa OpenGL + pre-baked SMAPI | Stardew Valley |
 
 ## Why?
 
@@ -59,6 +60,9 @@ runtimes/
     entrypoint.sh
   wine-vcrun/       <- wine-base + vcrun2022
     Dockerfile
+  stardew/          <- Xvfb + Mesa + SMAPI (native .NET)
+    Dockerfile
+    entrypoint.sh
 ```
 
 The entrypoint handles:
